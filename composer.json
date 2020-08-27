@@ -1,6 +1,7 @@
 {
     "name": "freedom/laravel-scrambler",
     "description": "A laravel scrambler/encryption of value",
+    "type": "library",
     "authors": [
         {
             "name": "Allen Jay Desamparado",
@@ -12,5 +13,18 @@
       "illuminate/config": "~5.0|~6.0|~7.0",
       "illuminate/support": "~5.0|~6.0|~7.0",
       "illuminate/contracts": "~5.0|~6.0|~7.0"
-    }
+    },
+    "autoload": {
+      "psr-4": {
+        "Freedom\\Scrambler\\": "src/Scrambler/"
+      }
+    },
+    "extra": {
+      "laravel": {
+        "providers": [
+          "Freedom\\Scrambler\\Providers\\LaravelServiceProvider"
+        ]
+      }
+    },
+    "minimum-stability": "dev"
 }
