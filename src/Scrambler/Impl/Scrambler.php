@@ -10,8 +10,8 @@ use Illuminate\Support\Arr;
 class Scrambler {
 
     const SESSION_INDEX  = 0;
-    const IP_INDEX  = 1;
-    const APP_INDEX  = 2;
+    const APP_INDEX  = 1;
+    const IP_INDEX  = 2;
     const DELIMITER = '#xrx#';
 
     public function encrypt($value){
@@ -19,10 +19,7 @@ class Scrambler {
             throw new EncryptException('Could not encrypt the data.');
         }
 
-        $body = [];
-        $body[self::SESSION_INDEX] = $this->getSessionId();
-        $body[self::APP_INDEX] = $this->getAppKey();
-        $body[self::IP_INDEX] = $this->getIP();
+        $body = $this->makeBody();
         $body[] = $value;
 
         return Crypt::encrypt(implode(self::DELIMITER,$body));
@@ -34,20 +31,21 @@ class Scrambler {
         }
 
         $body = explode(self::DELIMITER, Crypt::decrypt($encrypted));
-
-        if ($body[self::SESSION_INDEX] !== $this->getSessionId()) {
-            abort(404);
-        }
-
-        if ($body[self::APP_INDEX] !== $this->getAppKey()) {
-            abort(404);
-        }
-
-        if ($body[self::IP_INDEX] !== $this->getIP()) {
-            abort(404);
+        foreach($this->makeBody() as $key => $value){
+            if($body[$key] !== $value){
+                abort(404);
+            }
         }
 
         return Arr::last($body);
+    }
+
+    protected function makeBody(){
+        return [
+            self::SESSION_INDEX => $this->getSessionId(),
+            self::APP_INDEX => $this->getAppKey(),
+            self::IP_INDEX => $this->getIP(),
+        ];
     }
 
     protected function getSessionId(){
@@ -59,7 +57,8 @@ class Scrambler {
     }
 
     protected function getIP(){
-        return "ipxx";
+        //TODO ADD config if do add ip
+        return "ip_placeholder";
         foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key){
             if (array_key_exists($key, $_SERVER) === true){
                 foreach (explode(',', $_SERVER[$key]) as $ip){
